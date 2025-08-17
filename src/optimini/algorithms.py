@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import nlopt
 import numpy as np
 from numpy.typing import NDArray
 from scipy.optimize import Bounds as ScipyBounds
@@ -104,8 +105,47 @@ def _get_scipy_bounds(lower_bounds, upper_bounds):
     return ScipyBounds(lower_bounds, upper_bounds)
 
 
+@mark.minimizer(
+    name="nlopt_bobyqa",
+    supports_bounds=True,
+    needs_bounds=False,
+)
+@dataclass(frozen=True)
+class NloptBobyqa(Algorithm):
+    stopping_maxfun: int = 100
+    convergence_ftol_rel: float = 1e-4
+    # more options here ...
+
+    def _solve_internal_problem(
+        self, problem: InternalProblem, x0: NDArray[np.float64]
+    ) -> InternalResult:
+        def func(x, grad):
+            if grad.size > 0:
+                fun, jac = problem.fun_and_jac(x)
+                grad[:] = jac
+            else:
+                fun = problem.fun(x)
+            return fun
+
+        opt = nlopt.opt(nlopt.LN_BOBYQA, x0.shape[0])
+        opt.set_min_objective(func)
+        if self.convergence_ftol_rel is not None:
+            opt.set_ftol_rel(self.convergence_ftol_rel)
+        if self.stopping_maxfun is not None:
+            opt.set_maxeval(self.stopping_maxfun)
+        if problem.lower_bounds is not None:
+            opt.set_lower_bounds(problem.lower_bounds)
+        if problem.upper_bounds is not None:
+            opt.set_upper_bounds(problem.upper_bounds)
+
+        solution_x = opt.optimize(x0)
+
+        return InternalResult(solution_x, opt.last_optimum_value())
+
+
 OPTIMIZER_REGISTRY = {
     "L-BFGS-B": SciPyLBFGSB,
     "CG": SciPyCG,
     "Nelder-Mead": SciPyNelderMead,
+    "bobyqa": NloptBobyqa,
 }
