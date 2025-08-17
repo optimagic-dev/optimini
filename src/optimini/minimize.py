@@ -6,6 +6,7 @@ from optimini.utils import OptimizeResult
 
 
 def minimize(fun, params, method, options=None):
+    """Minimize a function using a given method"""
     options = {} if options is None else options
     converter = Converter(params)
     history = History()
