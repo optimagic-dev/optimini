@@ -1,0 +1,17 @@
+name: optimini
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.12
+  - numpy
+  - scipy
+  - pandas
+  - nlopt
+  - pdbpp
+  - matplotlib
+  - seaborn
+  - pre-commit
+  - pip
+  - pip:
+    - -e .

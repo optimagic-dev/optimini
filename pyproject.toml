@@ -1,0 +1,134 @@
+# ======================================================================================
+# Project metadata
+# ======================================================================================
+[project]
+name = "optimini"
+description = "A super minimalist bare bones rewrite to illustrate the core architectural ideas behind optimagic."
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "scipy",
+    "pandas",
+    "nlopt",
+    "matplotlib",
+    "seaborn",
+]
+dynamic = ["version"]
+
+authors = [
+    { name = "Janos Gabler", email = "janos.gabler@gmail.com" },
+]
+maintainers = [
+    { name = "Janos Gabler", email = "janos.gabler@gmail.com" },
+]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.license]
+text = "Apache-2.0"
+
+[project.urls]
+Repository = "https://github.com/optimagic-dev/optimini"
+Github = "https://github.com/optimagic-dev/optimini"
+Tracker = "https://github.com/optimagic-dev/optimini/issues"
+
+
+# ======================================================================================
+# Build system configuration
+# ======================================================================================
+[build-system]
+requires = ["hatchling", "hatch_vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/optimini/_version.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = ["tests"]
+only-packages = true
+
+[tool.hatch.build.targets.wheel]
+only-include = ["src"]
+sources = ["src"]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+
+# ======================================================================================
+# Ruff configuration
+# ======================================================================================
+[tool.ruff]
+target-version = "py310"
+fix = true
+
+[tool.ruff.lint]
+select = [
+  # isort
+  "I",
+  # pyflakes
+  "F",
+  # pycodestyle
+  "E",
+  "W",
+  # flake8-2020
+  "YTT",
+  # flake8-bugbear
+  "B",
+  # flake8-quotes
+  "Q",
+  # pylint
+  "PLE", "PLR", "PLW",
+  # misc lints
+  "PIE",
+  # tidy imports
+  "TID",
+  # implicit string concatenation
+  "ISC",
+]
+
+extend-ignore = [
+
+  # allow module import not at top of file, important for notebooks
+  "E402",
+  # do not assign a lambda expression, use a def
+  "E731",
+  # Too many arguments to function call
+  "PLR0913",
+  # Too many returns
+  "PLR0911",
+  # Too many branches
+  "PLR0912",
+  # Too many statements
+  "PLR0915",
+  # Magic number
+  "PLR2004",
+  # Consider `elif` instead of `else` then `if` to remove indentation level
+  "PLR5501",
+  # For calls to warnings.warn(): No explicit `stacklevel` keyword argument found
+  "B028",
+  # Incompatible with formatting
+  "ISC001",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+
+# ======================================================================================
+# Pytest configuration
+# ======================================================================================
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:Using or importing the ABCs from 'collections'",
+]
+markers = [
+    "wip: Tests that are work-in-progress.",
+    "slow: Tests that take a long time to run and are skipped in continuous integration.",
+    "jax: Tests that require jax to be installed and are skipped on non-Linux systems.",
+]
