@@ -12,6 +12,8 @@ dependencies:
   - matplotlib
   - seaborn
   - pre-commit
+  - pytest
+  - jupyterlab
   - pip
   - pip:
     - -e .
