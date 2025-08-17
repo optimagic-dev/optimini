@@ -10,10 +10,10 @@ def minimize(fun, params, method, options=None):
     """Minimize a function using a given method"""
     options = {} if options is None else options
     converter = Converter(params)
-    internal_fun = InternalProblem(fun, converter)
+    problem = InternalProblem(fun, converter)
     x0 = converter.flatten(params)
     raw_res = scipy_minimize(
-        fun=internal_fun.fun,
+        fun=problem.fun,
         x0=x0,
         method=method,
         options=options,
