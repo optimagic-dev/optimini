@@ -6,6 +6,7 @@ from optimini.utils import OptimizeResult
 
 
 def minimize(fun, params, method, lower_bounds=None, upper_bounds=None, options=None):
+    """Minimize a function using a given method"""
     options = {} if options is None else options
     algo = OPTIMIZER_REGISTRY[method](**options)
 
