@@ -1,5 +1,4 @@
-from scipy.optimize import minimize as scipy_minimize
-
+from optimini.algorithms import OPTIMIZER_REGISTRY
 from optimini.converter import Converter
 from optimini.history import History
 from optimini.internal_problem import InternalProblem
@@ -13,12 +12,8 @@ def minimize(fun, params, method, options=None):
     history = History()
     problem = InternalProblem(fun, converter, history)
     x0 = converter.flatten(params)
-    raw_res = scipy_minimize(
-        fun=problem.fun,
-        x0=x0,
-        method=method,
-        options=options,
-    )
+    algo = OPTIMIZER_REGISTRY[method](**options)
+    raw_res = algo._solve_internal_problem(problem, x0)
     res = OptimizeResult(
         x=converter.unflatten(raw_res.x),
         history=history,
