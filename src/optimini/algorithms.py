@@ -2,12 +2,19 @@ from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
+from scipy.optimize import Bounds as ScipyBounds
 from scipy.optimize import minimize as scipy_minimize
 
+from optimini import mark
 from optimini.internal_problem import InternalProblem
 from optimini.utils import Algorithm, InternalResult
 
 
+@mark.minimizer(
+    name="L-BFGS-B",
+    supports_bounds=True,
+    needs_bounds=False,
+)
 @dataclass(frozen=True)
 class SciPyLBFGSB(Algorithm):
     convergence_ftol: float = 1e-8
@@ -18,6 +25,8 @@ class SciPyLBFGSB(Algorithm):
     def _solve_internal_problem(
         self, problem: InternalProblem, x0: NDArray[np.float64]
     ) -> InternalResult:
+        bounds = _get_scipy_bounds(problem.lower_bounds, problem.upper_bounds)
+
         options = {
             "maxcor": self.limited_memory_length,
             "ftol": self.convergence_ftol,
@@ -27,11 +36,17 @@ class SciPyLBFGSB(Algorithm):
             fun=problem.fun,
             x0=x0,
             method="L-BFGS-B",
+            bounds=bounds,
             options=options,
         )
         return InternalResult(x=res.x, fun=res.fun)
 
 
+@mark.minimizer(
+    name="CG",
+    supports_bounds=False,
+    needs_bounds=False,
+)
 @dataclass(frozen=True)
 class SciPyCG(Algorithm):
     convergence_gtol: float = 1e-8
@@ -49,6 +64,11 @@ class SciPyCG(Algorithm):
         return InternalResult(x=res.x, fun=res.fun)
 
 
+@mark.minimizer(
+    name="Nelder-Mead",
+    supports_bounds=True,
+    needs_bounds=False,
+)
 @dataclass(frozen=True)
 class SciPyNelderMead(Algorithm):
     stopping_maxiter: int = 10_000
@@ -59,6 +79,8 @@ class SciPyNelderMead(Algorithm):
     def _solve_internal_problem(
         self, problem: InternalProblem, x0: NDArray[np.float64]
     ) -> InternalResult:
+        bounds = _get_scipy_bounds(problem.lower_bounds, problem.upper_bounds)
+
         options = {
             "maxiter": self.stopping_maxiter,
             "ftol": self.convergence_ftol,
@@ -66,9 +88,20 @@ class SciPyNelderMead(Algorithm):
         }
 
         res = scipy_minimize(
-            fun=problem.fun, x0=x0, method="Nelder-Mead", options=options
+            fun=problem.fun, x0=x0, method="Nelder-Mead", bounds=bounds, options=options
         )
         return InternalResult(x=res.x, fun=res.fun)
+
+
+def _get_scipy_bounds(lower_bounds, upper_bounds):
+    if lower_bounds is None and upper_bounds is None:
+        return None
+    if lower_bounds is None:
+        lower_bounds = -np.inf
+    if upper_bounds is None:
+        upper_bounds = np.inf
+
+    return ScipyBounds(lower_bounds, upper_bounds)
 
 
 OPTIMIZER_REGISTRY = {
