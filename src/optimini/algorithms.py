@@ -61,7 +61,7 @@ class SciPyNelderMead(Algorithm):
     ) -> InternalResult:
         options = {
             "maxiter": self.stopping_maxiter,
-            "ftol": self.convergence_ftol,
+            "fatol": self.convergence_ftol,
             "adaptive": self.adaptive,
         }
 
