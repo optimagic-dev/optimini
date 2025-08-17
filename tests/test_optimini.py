@@ -1,5 +1,6 @@
 import numpy as np
 
+from optimini.history import History, history_plot
 from optimini.minimize import minimize
 
 
@@ -24,3 +25,10 @@ def test_simple_minimize_with_array_params():
     res = minimize(array_fun, params, method="L-BFGS-B")
     assert isinstance(res.x, np.ndarray)
     assert np.allclose(res.x, np.array([0, 0]))
+
+
+def test_history_collection():
+    params = {"a": 1, "b": 2}
+    res = minimize(dict_fun, params, method="L-BFGS-B")
+    assert isinstance(res.history, History)
+    history_plot({"test": res})
